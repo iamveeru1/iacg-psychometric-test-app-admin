@@ -72,6 +72,8 @@ const ReportScreen: React.FC<ReportScreenProps> = ({ user, answers, onBack, auto
     const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
     const reportRef = useRef<HTMLDivElement>(null);
+    const page1Ref = useRef<HTMLDivElement>(null);
+    const page2Ref = useRef<HTMLDivElement>(null);
     const [isDownloading, setIsDownloading] = useState(false);
 
     // Auto download effect
@@ -115,46 +117,42 @@ const ReportScreen: React.FC<ReportScreenProps> = ({ user, answers, onBack, auto
     };
 
     const handleDownloadPDF = async () => {
-        if (!reportRef.current) return;
+        if (!page1Ref.current || !page2Ref.current) return;
         setIsDownloading(true);
 
         try {
-            const canvas = await html2canvas(reportRef.current, {
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+
+            // Process Page 1
+            const canvas1 = await html2canvas(page1Ref.current, {
                 scale: 2,
                 useCORS: true,
                 logging: false,
-                backgroundColor: '#f1f5f9',
-                windowWidth: reportRef.current.scrollWidth,
-                windowHeight: reportRef.current.scrollHeight,
+                backgroundColor: '#f9fafb', // bg-gray-50
+                windowWidth: page1Ref.current.scrollWidth,
+                windowHeight: page1Ref.current.scrollHeight,
             });
+            const imgData1 = canvas1.toDataURL('image/png');
+            pdf.addImage(imgData1, 'PNG', 0, 0, pdfWidth, pdfHeight);
 
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const imgProps = pdf.getImageProperties(imgData);
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            // Process Page 2
+            pdf.addPage();
+            const canvas2 = await html2canvas(page2Ref.current, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#f9fafb', // bg-gray-50
+                windowWidth: page2Ref.current.scrollWidth,
+                windowHeight: page2Ref.current.scrollHeight,
+            });
+            const imgData2 = canvas2.toDataURL('image/png');
+            pdf.addImage(imgData2, 'PNG', 0, 0, pdfWidth, pdfHeight);
 
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            let heightLeft = pdfHeight;
-            let position = 0;
-            let currentPage = 1;
-
-            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-            heightLeft -= pageHeight;
-
-            while (heightLeft > 0) {
-                pdf.addPage();
-                currentPage++;
-                position = -pageHeight * (currentPage - 1);
-                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-                heightLeft -= pageHeight;
-            }
-
-            const fileName = `Career_Report_${user.name.replace(/\s+/g, '_')}.pdf`;
-            pdf.save(fileName);
-
-        } catch (err) {
-            console.error("Failed to generate PDF", err);
+            pdf.save(`${user.name.replace(/\s+/g, '_')}_Career_Report.pdf`);
+        } catch (error) {
+            console.error('Error generating PDF:', error);
             alert("Could not generate PDF. Please try the Print option instead.");
         } finally {
             setIsDownloading(false);
@@ -210,9 +208,11 @@ const ReportScreen: React.FC<ReportScreenProps> = ({ user, answers, onBack, auto
         }
       `}</style>
 
-            {/* Report Container - Added padding-top to account for fixed header */}
-            <div className="pt-24 pb-12 flex justify-center print:p-0">
-                <div ref={reportRef} className="w-full max-w-[210mm] bg-gray-50 shadow-2xl min-h-[297mm] print:shadow-none print:w-full print:max-w-none flex flex-col overflow-hidden">
+            {/* Report Container */}
+            <div className="pt-24 pb-12 flex flex-col items-center gap-8 print:p-0">
+
+                {/* PAGE 1 */}
+                <div ref={page1Ref} className="w-full max-w-[210mm] bg-gray-50 shadow-2xl min-h-[297mm] print:shadow-none print:w-full print:max-w-none flex flex-col overflow-hidden relative">
                     {/* HEADER */}
                     <div className="bg-brand-navy text-white py-8 px-8 print:px-8 print:py-4">
                         <div className="w-full">
@@ -254,7 +254,7 @@ const ReportScreen: React.FC<ReportScreenProps> = ({ user, answers, onBack, auto
                         </div>
                     </div>
 
-                    {/* MAIN CONTENT */}
+                    {/* PAGE 1 CONTENT */}
                     <div className="w-full px-8 -mt-4 print:mt-0 print:px-0 flex-1">
 
                         {/* 1. SUMMARY */}
@@ -262,29 +262,29 @@ const ReportScreen: React.FC<ReportScreenProps> = ({ user, answers, onBack, auto
                             <div className="p-8 border-b border-gray-100">
                                 <div className="flex items-center gap-3 mb-6">
                                     <span className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-500 font-bold text-sm">01</span>
-                                    <h3 className="text-lg font-bold text-gray-900 uppercase tracking-wider">Career Personality</h3>
+                                    <h3 className="text-base font-bold text-gray-900 uppercase tracking-wider">Career Personality</h3>
                                 </div>
 
-                                <div className="flex flex-col md:flex-row gap-12 items-center">
-                                    <div className="text-center md:w-1/3 border-r border-gray-100 pr-0 md:pr-12">
-                                        <p className="text-sm text-gray-500 font-medium uppercase mb-2">Your Interest Code</p>
-                                        <h2 className="text-6xl font-black text-brand-navy tracking-tighter mb-4">
+                                <div className="flex flex-col md:flex-row gap-8 items-center">
+                                    <div className="text-center md:w-1/3 border-r border-gray-100 pr-0 md:pr-8">
+                                        <p className="text-xs text-gray-500 font-medium uppercase mb-2">Your Interest Code</p>
+                                        <h2 className="text-5xl font-black text-brand-navy tracking-tighter mb-4">
                                             {report.interestCode.join('')}
                                         </h2>
-                                        <div className="inline-flex items-center gap-2 bg-blue-50 text-brand-navy px-3 py-1 rounded-full text-xs font-bold uppercase">
-                                            <CheckCircle2 size={12} /> High Confidence
+                                        <div className="inline-flex items-center gap-2 bg-blue-50 text-brand-navy px-3 py-1 rounded-full text-[10px] font-bold uppercase">
+                                            <CheckCircle2 size={10} /> High Confidence
                                         </div>
                                     </div>
                                     <div className="md:w-2/3">
-                                        <h4 className="text-2xl font-bold text-gray-900 mb-3">What this means</h4>
-                                        <p className="text-gray-600 leading-relaxed mb-4 text-justify">
+                                        <h4 className="text-lg font-bold text-gray-900 mb-2">What this means</h4>
+                                        <p className="text-sm text-gray-600 leading-relaxed mb-3 text-justify">
                                             <span className="font-bold text-brand-navy">Your primary interest is {report.details[report.interestCode[0]].name}.</span>{' '}
                                             {report.details[report.interestCode[0]].description}
                                         </p>
 
-                                        <div className="flex gap-2 mt-4">
+                                        <div className="flex gap-2 mt-3">
                                             {report.interestCode.map(code => (
-                                                <span key={code} className="px-3 py-1 bg-gray-100 text-gray-600 rounded text-xs font-bold border border-gray-200">
+                                                <span key={code} className="px-2.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-bold border border-gray-200">
                                                     {report.details[code].name}
                                                 </span>
                                             ))}
@@ -359,108 +359,110 @@ const ReportScreen: React.FC<ReportScreenProps> = ({ user, answers, onBack, auto
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        {/* 3. TOP THEMES */}
-                        <div className="bg-white rounded-xl shadow-xl overflow-hidden mb-4 print-container print-break-inside print:shadow-none print:border-b print:rounded-none">
-                            <div className="p-5">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <span className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-500 font-bold text-sm">03</span>
-                                    <h3 className="text-lg font-bold text-gray-900 uppercase tracking-wider">Top Themes Analysis</h3>
-                                </div>
+                {/* PAGE 2 */}
+                <div ref={page2Ref} className="w-full max-w-[210mm] bg-gray-50 shadow-2xl min-h-[297mm] print:shadow-none print:w-full print:max-w-none flex flex-col overflow-hidden relative p-8">
+                    {/* 3. TOP THEMES */}
+                    <div className="bg-white rounded-xl shadow-xl overflow-hidden mb-4 print-container print-break-inside print:shadow-none print:border-b print:rounded-none">
+                        <div className="p-5">
+                            <div className="flex items-center gap-3 mb-4">
+                                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-500 font-bold text-sm">03</span>
+                                <h3 className="text-lg font-bold text-gray-900 uppercase tracking-wider">Top Themes Analysis</h3>
+                            </div>
 
-                                <div className="flex flex-col gap-3">
-                                    {report.interestCode.map((code, index) => {
-                                        const detail = report.details[code];
-                                        const color = getColor(code);
+                            <div className="flex flex-col gap-3">
+                                {report.interestCode.map((code, index) => {
+                                    const detail = report.details[code];
+                                    const color = getColor(code);
 
-                                        return (
-                                            <div key={code} className="bg-gray-50 rounded-xl p-5 border border-gray-100 relative overflow-hidden group hover:shadow-md transition-shadow">
-                                                <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: color }}></div>
+                                    return (
+                                        <div key={code} className="bg-gray-50 rounded-xl p-5 border border-gray-100 relative overflow-hidden group hover:shadow-md transition-shadow">
+                                            <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: color }}></div>
 
-                                                <div className="flex flex-col md:flex-row gap-4">
-                                                    {/* Left Side: Header & Description */}
-                                                    <div className="md:w-5/12 flex flex-col justify-center">
-                                                        <div className="flex items-center gap-3 mb-2">
-                                                            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold shadow-sm text-base" style={{ backgroundColor: color }}>
-                                                                {code}
-                                                            </div>
-                                                            <div>
-                                                                <h4 className="text-base font-bold text-gray-900">{detail.name}</h4>
-                                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                                                                    {index === 0 ? 'Primary' : index === 1 ? 'Secondary' : 'Tertiary'}
-                                                                </span>
-                                                            </div>
+                                            <div className="flex flex-col md:flex-row gap-4">
+                                                {/* Left Side: Header & Description */}
+                                                <div className="md:w-5/12 flex flex-col justify-center">
+                                                    <div className="flex items-center gap-3 mb-2">
+                                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold shadow-sm text-base" style={{ backgroundColor: color }}>
+                                                            {code}
                                                         </div>
-                                                        <p className="text-xs text-gray-600 leading-relaxed text-justify">
-                                                            {detail.description}
+                                                        <div>
+                                                            <h4 className="text-base font-bold text-gray-900">{detail.name}</h4>
+                                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                                                {index === 0 ? 'Primary' : index === 1 ? 'Secondary' : 'Tertiary'}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-xs text-gray-600 leading-relaxed text-justify">
+                                                        {detail.description}
+                                                    </p>
+                                                </div>
+
+                                                {/* Right Side: Details */}
+                                                <div className="md:w-7/12 grid grid-cols-2 gap-2">
+                                                    <div className="bg-blue-50/50 p-2 rounded-lg border border-blue-100/50 col-span-2 flex flex-col justify-center">
+                                                        <p className="text-[10px] text-brand-navy uppercase font-bold mb-1 flex items-center gap-1">
+                                                            <span className="w-1 h-1 bg-brand-navy rounded-full"></span> Good Majors
                                                         </p>
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {detail.majors.map((major, i) => (
+                                                                <span key={i} className="px-1.5 py-0.5 bg-white text-gray-700 text-[10px] font-medium rounded border border-blue-100 shadow-sm">
+                                                                    {major}
+                                                                </span>
+                                                            ))}
+                                                        </div>
                                                     </div>
 
-                                                    {/* Right Side: Details */}
-                                                    <div className="md:w-7/12 grid grid-cols-2 gap-2">
-                                                        <div className="bg-blue-50/50 p-2 rounded-lg border border-blue-100/50 col-span-2 flex flex-col justify-center">
-                                                            <p className="text-[10px] text-brand-navy uppercase font-bold mb-1 flex items-center gap-1">
-                                                                <span className="w-1 h-1 bg-brand-navy rounded-full"></span> Good Majors
-                                                            </p>
-                                                            <div className="flex flex-wrap gap-1">
-                                                                {detail.majors.map((major, i) => (
-                                                                    <span key={i} className="px-1.5 py-0.5 bg-white text-gray-700 text-[10px] font-medium rounded border border-blue-100 shadow-sm">
-                                                                        {major}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        </div>
+                                                    <div className="bg-amber-50/50 p-2 rounded-lg border border-amber-100/50 flex flex-col justify-center">
+                                                        <p className="text-[10px] text-amber-700 uppercase font-bold mb-1 flex items-center gap-1">
+                                                            <span className="w-1 h-1 bg-amber-700 rounded-full"></span> Interests
+                                                        </p>
+                                                        <p className="text-[10px] font-medium text-gray-700 leading-snug">{detail.interests}</p>
+                                                    </div>
 
-                                                        <div className="bg-amber-50/50 p-2 rounded-lg border border-amber-100/50 flex flex-col justify-center">
-                                                            <p className="text-[10px] text-amber-700 uppercase font-bold mb-1 flex items-center gap-1">
-                                                                <span className="w-1 h-1 bg-amber-700 rounded-full"></span> Interests
-                                                            </p>
-                                                            <p className="text-[10px] font-medium text-gray-700 leading-snug">{detail.interests}</p>
-                                                        </div>
-
-                                                        <div className="bg-emerald-50/50 p-2 rounded-lg border border-emerald-100/50 flex flex-col justify-center">
-                                                            <p className="text-[10px] text-emerald-700 uppercase font-bold mb-1 flex items-center gap-1">
-                                                                <span className="w-1 h-1 bg-emerald-700 rounded-full"></span> Key Skills
-                                                            </p>
-                                                            <p className="text-[10px] font-medium text-gray-700 leading-snug">{detail.skills}</p>
-                                                        </div>
+                                                    <div className="bg-emerald-50/50 p-2 rounded-lg border border-emerald-100/50 flex flex-col justify-center">
+                                                        <p className="text-[10px] text-emerald-700 uppercase font-bold mb-1 flex items-center gap-1">
+                                                            <span className="w-1 h-1 bg-emerald-700 rounded-full"></span> Key Skills
+                                                        </p>
+                                                        <p className="text-[10px] font-medium text-gray-700 leading-snug">{detail.skills}</p>
                                                     </div>
                                                 </div>
                                             </div>
-                                        );
-                                    })}
-                                </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
+                    </div>
 
-                        {/* 4. RECOMMENDATIONS */}
-                        {/* 4. RECOMMENDATIONS */}
-                        <div className="bg-brand-navy rounded-xl shadow-xl overflow-hidden text-white print-container print-break-inside print:bg-brand-navy print:text-white print:rounded-none">
-                            <div className="p-6">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white/10 text-brand-gold font-bold text-sm">04</span>
-                                    <h3 className="text-lg font-bold text-white uppercase tracking-wider">Career Recommendations</h3>
-                                </div>
-                                <div className="grid md:grid-cols-2 gap-8">
-                                    <div>
-                                        <h4 className="font-bold text-blue-200 uppercase text-xs tracking-widest mb-4">Recommended Streams</h4>
-                                        <div className="space-y-2">
-                                            {['Science (PCB) - Medical/Bio', 'Arts & Humanities', 'Commerce & Business'].map((stream, idx) => (
-                                                <div key={idx} className="bg-white/5 rounded-lg p-2.5 border border-white/5 flex justify-between items-center">
-                                                    <span className="font-medium text-xs">{stream}</span>
-                                                </div>
-                                            ))}
-                                        </div>
+                    {/* 4. RECOMMENDATIONS */}
+                    <div className="bg-brand-navy rounded-xl shadow-xl overflow-hidden text-white print-container print-break-inside print:bg-brand-navy print:text-white print:rounded-none">
+                        <div className="p-6">
+                            <div className="flex items-center gap-3 mb-4">
+                                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white/10 text-brand-gold font-bold text-sm">04</span>
+                                <h3 className="text-lg font-bold text-white uppercase tracking-wider">Career Recommendations</h3>
+                            </div>
+                            <div className="grid md:grid-cols-2 gap-8">
+                                <div>
+                                    <h4 className="font-bold text-blue-200 uppercase text-xs tracking-widest mb-4">Recommended Streams</h4>
+                                    <div className="space-y-2">
+                                        {['Science (PCB) - Medical/Bio', 'Arts & Humanities', 'Commerce & Business'].map((stream, idx) => (
+                                            <div key={idx} className="bg-white/5 rounded-lg p-2.5 border border-white/5 flex justify-between items-center">
+                                                <span className="font-medium text-xs">{stream}</span>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <div className="flex flex-col items-center">
-                                        <h4 className="font-bold text-blue-200 uppercase text-xs tracking-widest mb-4 text-center">Best Fit Career Clusters</h4>
-                                        <div className="flex flex-wrap justify-center gap-2">
-                                            {report.details[report.interestCode[0]].pathways.map((path, idx) => (
-                                                <div key={idx} className="bg-white/10 rounded-lg px-3 py-1.5 border border-white/10 shadow-sm">
-                                                    <span className="text-xs font-medium text-gray-100">{path}</span>
-                                                </div>
-                                            ))}
-                                        </div>
+                                </div>
+                                <div className="flex flex-col items-center">
+                                    <h4 className="font-bold text-blue-200 uppercase text-xs tracking-widest mb-4 text-center">Best Fit Career Clusters</h4>
+                                    <div className="flex flex-wrap justify-center gap-2">
+                                        {report.details[report.interestCode[0]].pathways.map((path, idx) => (
+                                            <div key={idx} className="bg-white/10 rounded-lg px-3 py-1.5 border border-white/10 shadow-sm">
+                                                <span className="text-xs font-medium text-gray-100">{path}</span>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                             </div>
