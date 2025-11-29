@@ -5,7 +5,7 @@ const RIASEC_CONTENT: { [key: string]: RiasecDetail } = {
   R: {
     code: 'R',
     name: 'Realistic',
-    description: "These people are often good at mechanical or athletic jobs. Good college majors for Realistic people are…",
+    description: "Realistic individuals enjoy practical, hands-on activities and prefer working with tools, machines, technology, or outdoor settings. They like tasks that involve building, fixing, operating, or creating physical results, and they feel comfortable in active, task-focused environments.",
     majors: [
       'Agriculture',
       'Health Assistant',
@@ -29,7 +29,7 @@ const RIASEC_CONTENT: { [key: string]: RiasecDetail } = {
   I: {
     code: 'I',
     name: 'Investigative',
-    description: "These people like to watch, learn, analyze and solve problems. Good college majors for Investigative people are…",
+    description: "Investigative individuals are curious thinkers who enjoy analyzing, researching, and understanding complex ideas. They like exploring how things work, solving problems using logic, and engaging with subjects like science, mathematics, or technical fields that require deep thinking.",
     majors: [
       'Marine Biology',
       'Engineering',
@@ -53,7 +53,7 @@ const RIASEC_CONTENT: { [key: string]: RiasecDetail } = {
   A: {
     code: 'A',
     name: 'Artistic',
-    description: "These people like to work in unstructured situations where they can use their creativity. Good majors for Artistic people are…",
+    description: "Artistic individuals thrive in creative and expressive environments where they can use imagination and originality. They enjoy activities such as designing, writing, performing, or creating visual and digital art, and prefer work that allows freedom, flexibility, and personal expression.",
     majors: [
       'Communications',
       'Cosmetology',
@@ -75,7 +75,7 @@ const RIASEC_CONTENT: { [key: string]: RiasecDetail } = {
   S: {
     code: 'S',
     name: 'Social',
-    description: "These people like to work with other people, rather than things. Good college majors for Social people are…",
+    description: "Social individuals enjoy helping, guiding, teaching, and supporting others through communication and care. They are empathetic, patient, and motivated by making a positive impact, often choosing environments where they can interact, collaborate, and contribute to people’s growth.",
     majors: [
       'Counseling',
       'Nursing',
@@ -97,7 +97,7 @@ const RIASEC_CONTENT: { [key: string]: RiasecDetail } = {
   E: {
     code: 'E',
     name: 'Enterprising',
-    description: "These people like to work with others and enjoy persuading and performing. Good college majors for Enterprising people are:",
+    description: "Enterprising individuals are confident, persuasive, and driven by leadership, achievement, and influence. They enjoy taking initiative, organizing people or projects, and working in business, law, management, or entrepreneurship where decision-making and goal-setting matter.",
     majors: [
       'Fashion Merchandising',
       'Real Estate',
@@ -120,7 +120,7 @@ const RIASEC_CONTENT: { [key: string]: RiasecDetail } = {
   C: {
     code: 'C',
     name: 'Conventional',
-    description: "These people are very detail oriented, organized and like to work with data. Good college majors for Conventional people are…",
+    description: "Conventional individuals prefer structured, organized, and detail-oriented tasks that require accuracy and consistency. They enjoy working with data, numbers, systems, and records, and excel in environments where planning, routines, and clear procedures guide the work.",
     majors: [
       'Accounting',
       'Court Reporting',
@@ -205,7 +205,7 @@ const getScore = (ans: string | undefined): number => {
 };
 
 export const calculateReport = (answers: UserAnswers): ReportData => {
-  
+
   // Initialize accumulators
   const rawScores: { [key: string]: number } = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
   const counts: { [key: string]: number } = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
@@ -218,14 +218,14 @@ export const calculateReport = (answers: UserAnswers): ReportData => {
     const type = QUESTION_TYPE_MAP[i];
 
     if (type && val > 0) {
-        rawScores[type] += val;
-        counts[type] += 1;
+      rawScores[type] += val;
+      counts[type] += 1;
     } else if (type) {
-        // Even if val is 0 or missing, we count the question as part of the category
-        // to compute average correctly if we want to penalize skipped questions.
-        // Assuming "0" means skipped or "Strongly Disagree" depending on scale.
-        // Here we just count it.
-        counts[type] += 1;
+      // Even if val is 0 or missing, we count the question as part of the category
+      // to compute average correctly if we want to penalize skipped questions.
+      // Assuming "0" means skipped or "Strongly Disagree" depending on scale.
+      // Here we just count it.
+      counts[type] += 1;
     }
   }
 
