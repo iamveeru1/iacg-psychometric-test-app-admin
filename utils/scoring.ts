@@ -21,7 +21,7 @@ const RIASEC_CONTENT: { [key: string]: RiasecDetail } = {
       'Industrial and Engineering Technology',
       'Arts and Communication'
     ],
-    interests: 'Machines, tools, outdoors, mechanical systems, hands-on work',
+    interests: 'Mechanics, Operations, Engineering, Outdoors, Robotics',
     activities: 'Operating equipment, using tools, building, repairing, maintaining vehicles',
     skills: 'Mechanical ability, physical coordination, working with tools, troubleshooting',
     values: 'Practicality, tradition, self-reliance, physical challenge'
@@ -45,7 +45,7 @@ const RIASEC_CONTENT: { [key: string]: RiasecDetail } = {
       'Public and Human Services',
       'Industrial and Engineering Technology'
     ],
-    interests: 'Science, medicine, mathematics, research, complex problems',
+    interests: 'Research, Analysis, Experimentation, Logic, Exploration',
     activities: 'Performing lab experiments, solving abstract problems, conducting research',
     skills: 'Mathematical ability, scientific ability, analytical skills, critical thinking',
     values: 'Curiosity, learning, independence, logic'
@@ -64,10 +64,12 @@ const RIASEC_CONTENT: { [key: string]: RiasecDetail } = {
       'Architecture'
     ],
     pathways: [
+      'Arts and Communication',
       'Public and Human Services',
-      'Arts and Communication'
+      'Business',
+      'Health Services'
     ],
-    interests: 'Self-expression, art appreciation, communication, culture, design',
+    interests: 'Drawing, Design, Writing, Performance, Creativity',
     activities: 'Composing music, performing, writing, creating visual art, designing',
     skills: 'Creativity, musical ability, artistic expression, imaginative thinking',
     values: 'Beauty, originality, independence, imagination'
@@ -87,9 +89,11 @@ const RIASEC_CONTENT: { [key: string]: RiasecDetail } = {
     ],
     pathways: [
       'Health Services',
-      'Public and Human Services'
+      'Public and Human Services',
+      'Arts and Communication',
+      'Business'
     ],
-    interests: 'People, teamwork, helping, community service, teaching',
+    interests: 'Teaching, Counselling, Helping, Collaboration, Communication',
     activities: 'Teaching, caring for people, counseling, training employees',
     skills: 'People skills, verbal ability, listening, showing understanding',
     values: 'Cooperation, generosity, service to others, empathy'
@@ -110,9 +114,10 @@ const RIASEC_CONTENT: { [key: string]: RiasecDetail } = {
     pathways: [
       'Business',
       'Public and Human Services',
-      'Arts and Communication'
+      'Arts and Communication',
+      'Health Services'
     ],
-    interests: 'Business, politics, leadership, entrepreneurship, influencing',
+    interests: 'Leadership, Negotiation, Entrepreneurship, Persuasion, Management',
     activities: 'Selling, managing, persuading, marketing, public speaking',
     skills: 'Verbal ability, ability to motivate and direct others, negotiation',
     values: 'Risk taking, status, competition, influence'
@@ -131,11 +136,12 @@ const RIASEC_CONTENT: { [key: string]: RiasecDetail } = {
       'Data Processing'
     ],
     pathways: [
-      'Health Services',
       'Business',
-      'Industrial and Engineering Technology'
+      'Health Services',
+      'Industrial and Engineering Technology',
+      'Public and Human Services'
     ],
-    interests: 'Organization, data management, accounting, investing, efficiency',
+    interests: 'Organisation, Documentation, Accounting, Data-handling, Planning',
     activities: 'Setting up procedures, record keeping, data processing, calculating',
     skills: 'Clerical ability, attention to detail, working with numbers, organizing',
     values: 'Accuracy, stability, efficiency, order'
