@@ -144,12 +144,12 @@ const ReportScreen: React.FC<ReportScreenProps> = ({ user, answers, onBack, auto
         try {
             // Scroll to top to ensure proper capture
             window.scrollTo(0, 0);
-            
+
             // Wait a moment for scroll
             await new Promise(resolve => setTimeout(resolve, 100));
-            
+
             const element = reportRef.current;
-            
+
             // Capture the element with specific settings to prevent text shift
             const canvas = await html2canvas(element, {
                 scale: 3, // Higher scale for better quality
@@ -163,14 +163,14 @@ const ReportScreen: React.FC<ReportScreenProps> = ({ user, answers, onBack, auto
                 onclone: (clonedDoc, clonedElement) => {
                     // Remove shadow
                     clonedElement.style.boxShadow = 'none';
-                    
+
                     // Only shift text elements up, not containers
                     const textElements = clonedElement.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
                     textElements.forEach((el) => {
                         const htmlEl = el as HTMLElement;
                         htmlEl.style.transform = 'translateY(-5px)';
                     });
-                    
+
                     // Also shift span elements that contain text (not layout containers)
                     const spanElements = clonedElement.querySelectorAll('span');
                     spanElements.forEach((el) => {
@@ -197,10 +197,10 @@ const ReportScreen: React.FC<ReportScreenProps> = ({ user, answers, onBack, auto
 
             // Convert canvas to image
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
-            
+
             // Add image to PDF - fill entire page
             pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-            
+
             // Save PDF
             pdf.save(`${user.name.replace(/\s+/g, '_')}_Career_Report.pdf`);
         } catch (error) {
@@ -324,14 +324,11 @@ const ReportScreen: React.FC<ReportScreenProps> = ({ user, answers, onBack, auto
                             </div>
 
                             <div className="flex flex-col md:flex-row gap-3">
-                                <div className="md:w-1/3 flex flex-col items-center justify-center border-r border-gray-100 pr-3">
+                                <div className="md:w-1/3 flex flex-col items-center justify-center border-r border-gray-100 pr-3 text-center">
                                     <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-0.5">YOUR INTEREST CODE</p>
                                     <h2 className="text-3xl font-black text-[#1e3a8a] tracking-tighter mb-0.5">
                                         {report.interestCode.join('')}
                                     </h2>
-                                    <div className="bg-[#1e3a8a] text-white px-3 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide">
-                                        High Confidence
-                                    </div>
                                 </div>
                                 <div className="md:w-2/3 flex flex-col justify-between">
                                     <div>
@@ -368,8 +365,9 @@ const ReportScreen: React.FC<ReportScreenProps> = ({ user, answers, onBack, auto
                                             <div key={item.code} className="flex items-center gap-2">
                                                 <span className="text-[9px] font-bold text-gray-500 uppercase w-20">{report.details[item.code].name}</span>
                                                 <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden relative">
-                                                    <div className="h-full rounded-full absolute top-0 left-0" style={{ width: `${percentage}%`, backgroundColor: color }} />
-                                                    <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[7px] font-bold text-white drop-shadow-md">{percentage}%</span>
+                                                    <div className="h-full rounded-full absolute top-0 left-0 flex items-center justify-end pr-1" style={{ width: `${percentage}%`, backgroundColor: color }}>
+                                                        <span className="text-[7px] font-bold text-white leading-none">{percentage}%</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         );
