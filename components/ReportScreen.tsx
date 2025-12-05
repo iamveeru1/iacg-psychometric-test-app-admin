@@ -7,8 +7,6 @@ import { jsPDF } from 'jspdf';
 import Button from './Button';
 import logo from '../assets/images/logo.png';
 
-
-
 interface ReportScreenProps {
     user: Student; // Using Student type from types.ts
     answers: UserAnswers;
@@ -67,35 +65,33 @@ const ExpandableText = ({
     );
 };
 
+const calculateStreamScores = (scores: Record<string, number>) => {
+    return {
+        science: (scores.R || 0) + (scores.I || 0),         // Realistic + Investigative
+        commerce: (scores.E || 0) + (scores.C || 0),       // Enterprising + Conventional
+        arts: (scores.A || 0) + (scores.S || 0)            // Artistic + Social
+    };
+};
+
+const getTopTwoStreams = (scores: Record<string, number>) => {
+    const streamScores = calculateStreamScores(scores);
+
+    const ranked = Object.entries(streamScores)
+        .sort((a, b) => b[1] - a[1])      // sort highest → lowest
+        .slice(0, 2);                     // get top 2 streams only
+
+    return ranked.map(([stream]) => {
+        if (stream === "science") return "Maths / Science / Medical";
+        if (stream === "commerce") return "Commerce & Business";
+        return "Arts, Humanities & Creative Stream";
+    });
+};
+
 const ReportScreen: React.FC<ReportScreenProps> = ({ user, answers, onBack, autoDownload = false }) => {
     const report = calculateReport(answers);
     const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
-    // Function to get recommended streams based on RIASEC code
-    const getRecommendedStreams = (interestCode: string[]) => {
-        const primaryCode = interestCode[0];
-        const secondaryCode = interestCode[1];
-
-        // 1. Maths/Science/Medical - R, I, C aligned
-        if (primaryCode === 'R' || primaryCode === 'I') {
-            return ['Maths / Science / Medical', 'Commerce & Business'];
-        }
-
-        // 2. Commerce & Business - E, C, S aligned
-        if (primaryCode === 'E' || primaryCode === 'C') {
-            return ['Commerce & Business', 'Arts, Humanities & Creative'];
-        }
-
-        // 3. Arts, Humanities & Creative - A, S, E aligned
-        if (primaryCode === 'A' || primaryCode === 'S') {
-            return ['Arts, Humanities & Creative', 'Commerce & Business'];
-        }
-
-        // Default fallback
-        return ['Maths / Science / Medical', 'Arts, Humanities & Creative'];
-    };
-
-    const recommendedStreams = getRecommendedStreams(report.interestCode);
+    const recommendedStreams = getTopTwoStreams(report.scores);
 
     const reportRef = useRef<HTMLDivElement>(null);
     const [isDownloading, setIsDownloading] = useState(false);
